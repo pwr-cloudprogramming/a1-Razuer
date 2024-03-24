@@ -2,12 +2,10 @@ FROM node:lts
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY src/ .
 
 RUN npm install
 
-COPY . .
+EXPOSE 8080
 
-EXPOSE 3000
-
-CMD ["node", "src/server.js"]
+CMD ["node", "server.js"]
