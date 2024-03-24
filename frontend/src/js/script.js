@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const socket = io("http://localhost:3000", {
+    const socket = io("http://<EC2 PUBLIC ADRESS>:8080", {
         transports: ["websocket", "polling", "flashsocket"],
     });
 
