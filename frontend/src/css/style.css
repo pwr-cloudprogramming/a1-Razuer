@@ -1,0 +1,190 @@
+@font-face {
+    font-family: Orbitron;
+    src: url(Orbitron-SemiBold.ttf);
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 100px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+input {
+    font-family: "Orbitron";
+}
+
+body,
+html {
+    height: max-content;
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: "Orbitron";
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-gap: 10px;
+    margin: 50px auto;
+    position: relative;
+}
+
+.cell {
+    width: 100px;
+    height: 100px;
+    background-color: #f0f0f0;
+    box-shadow: rgba(151, 65, 252, 0.2) 3px 3px 30px 10px;
+    box-sizing: border-box;
+    outline: 3px ridge rgba(170, 50, 220, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+/* Animacja przy najechaniu kursorem */
+.cell:hover {
+    transform: scale(1.05);
+    background-color: #e0e0e0;
+}
+
+/* Animacja przy kliknięciu */
+.cell:active {
+    transform: scale(0.95);
+    background-color: #d0d0d0;
+}
+
+.winner {
+    text-decoration: line-through;
+}
+
+.strike {
+    position: absolute;
+    outline: 3px ridge rgba(4, 1, 5, 0.8);
+    background-color: rgba(0, 255, 255, 0.7);
+    box-shadow: rgba(65, 177, 252, 4) 0 1px 30px 5px;
+    border-radius: 2px;
+}
+
+.strike-row {
+    width: 110%;
+    height: 6px;
+    left: -5%;
+}
+
+.strike-row-1 {
+    top: 15%;
+}
+
+.strike-row-2 {
+    top: 49%;
+}
+
+.strike-row-3 {
+    top: 83%;
+}
+
+.strike-column {
+    height: 110%;
+    width: 6px;
+    top: -5%;
+}
+
+.strike-column-1 {
+    left: 15%;
+}
+
+.strike-column-2 {
+    left: 50%;
+}
+
+.strike-column-3 {
+    left: 84%;
+}
+
+.strike-diagonal-1 {
+    height: 10px;
+    width: 100%;
+    top: 48%;
+    left: 0%;
+    border-radius: 10px;
+    outline-width: 4px;
+    transform: skewY(45deg) skewX(-19deg);
+}
+
+.strike-diagonal-2 {
+    height: 10px;
+    width: 100%;
+    top: 48%;
+    left: 0%;
+    border-radius: 10px;
+    outline-width: 4px;
+    transform: skewY(-45deg) skewX(19deg);
+}
+
+.button-64 {
+    align-items: center;
+    background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+    border: 0;
+    border-radius: 8px;
+    box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+    box-sizing: border-box;
+    color: #ffffff;
+    display: flex;
+    font-family: "Orbitron";
+    font-size: 20px;
+    justify-content: center;
+    line-height: 1em;
+    max-width: 100%;
+    min-width: 140px;
+    padding: 3px;
+    text-decoration: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    white-space: nowrap;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.button-64:active,
+.button-64:hover {
+    outline: 0;
+}
+
+.button-64 span {
+    background-color: rgb(5, 6, 45);
+    padding: 16px 24px;
+    border-radius: 6px;
+    width: 100%;
+    height: 100%;
+    transition: 300ms;
+}
+
+.button-64:hover span {
+    background: none;
+}
+
+@media (min-width: 768px) {
+    .button-64 {
+        font-size: 24px;
+        min-width: 196px;
+    }
+}
