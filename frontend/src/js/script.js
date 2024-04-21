@@ -1,9 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    
-    const ec2PublicAddress = process.env.IP;
-
-    // Tworzenie adresu URL z dynamiczną wartością IP
-    const socket = io(`http://${ec2PublicAddress}:8080`, {
+        // Tworzenie adresu URL z dynamiczną wartością IP
+    const socket = io(`http://<CLOUD9-PUBLIC-IP>:8080`, {
         transports: ["websocket", "polling", "flashsocket"],
     });
 
