@@ -4,6 +4,10 @@ RUN adduser -D stud
 USER stud
 WORKDIR /home/stud
 
+ARG IP
+
+ENV IP=$IP
+
 COPY src/ .
 
 ENTRYPOINT ["busybox"]
