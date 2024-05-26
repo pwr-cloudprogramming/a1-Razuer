@@ -1,10 +1,11 @@
-FROM node:lts
+FROM node:22-alpine
 
 WORKDIR /usr/src/app
 
 COPY public/ ./public
 COPY src/ ./src
 COPY package.json .
+COPY package-lock.json .
 
 # Pobierz zmienne środowiskowe
 ENV REACT_APP_COGNITO_REGION=$REACT_APP_COGNITO_REGION
