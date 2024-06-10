@@ -1,0 +1,19 @@
+.slide-enter {
+    height: 0;
+    overflow: hidden;
+    transition: height 300ms ease-in-out;
+}
+
+.slide-enter-active {
+    height: auto;
+}
+
+.slide-exit {
+    height: auto;
+    overflow: hidden;
+    transition: height 300ms ease-in-out;
+}
+
+.slide-exit-active {
+    height: 0;
+}
