@@ -33,6 +33,8 @@ const s3Config = {
     sessionToken: process.env.REACT_APP_AWS_SESSION_TOKEN || undefined,
 };
 
+AWS.config.update({region:'us-east-1'});
+
 const s3 = new AWS.S3();
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const sns = new AWS.SNS();
