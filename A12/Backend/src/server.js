@@ -33,9 +33,9 @@ const s3Config = {
     sessionToken: process.env.REACT_APP_AWS_SESSION_TOKEN || undefined,
 };
 
-const s3 = new AWS.S3(s3Config);
-const dynamoDb = new AWS.DynamoDB.DocumentClient(s3Config);
-const sns = new AWS.SNS(s3Config);
+const s3 = new AWS.S3();
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const sns = new AWS.SNS();
 
 app.use(cors());
 app.use(express.json());
