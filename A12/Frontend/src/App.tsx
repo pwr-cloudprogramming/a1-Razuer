@@ -24,7 +24,16 @@ const App = () => {
                         )
                     }
                 />
-                <Route path="/login" element={<LoginPage />} />
+                <Route
+                    path="/login"
+                    element={
+                        isAuthenticated() ? (
+                            <Navigate replace to="/game" />
+                        ) : (
+                            <LoginPage />
+                        )
+                    }
+                />
                 <Route path="/confirm" element={<ConfirmUserPage />} />
                 <Route
                     path="/game"

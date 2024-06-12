@@ -15,6 +15,7 @@ const Game = () => {
     const [playerRole, setPlayerRole] = useState("");
     const [currentPlayer, setCurrentPlayer] = useState("");
     const [gameOver, setGameOver] = useState(false);
+    const [debouncing, setDebouncing] = useState(false);
     const [board, setBoard] = useState(Array(9).fill(""));
     const [info, setInfo] = useState("");
     const [winningCombination, setWinningCombination] = useState(-1);
@@ -26,8 +27,20 @@ const Game = () => {
             if (socket) {
                 socket.on("playerRole", (role) => {
                     setPlayerRole(role);
+                    console.log("Sent role: " + role);
                 });
+            }
+        }
+    }, [socket]);
 
+    useEffect(() => {
+        console.log("Set role: " + playerRole);
+    }, [playerRole]);
+
+    useEffect(() => {
+        const token = sessionStorage.getItem("idToken");
+        if (token) {
+            if (socket) {
                 socket.on("waiting", () => {
                     setInfo("Waiting for second player ...");
                 });
@@ -47,29 +60,35 @@ const Game = () => {
                     if (gameData.gameOver) {
                         if (gameData.winner) {
                             setInfo(`Player ${gameData.winner} wins!`);
-                            if (gameData.winner === playerRole) {
+                            if (!gameData.oldGame) {
+                                if (gameData.winner == playerRole) {
+                                    Swal.fire({
+                                        icon: "success",
+                                        title: "Congrats!\nYou win!",
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Ahhh ...\nYou lost!",
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                    });
+                                    console.log(gameData.winner);
+                                    console.log(playerRole);
+                                }
+                            }
+                        } else {
+                            setInfo("It's a draw!");
+                            if (!gameData.oldGame) {
                                 Swal.fire({
-                                    icon: "success",
-                                    title: "Congrats!\nYou win!",
-                                    showConfirmButton: false,
-                                    timer: 2000,
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: "error",
-                                    title: "Ahhh ...\nYou lost!",
+                                    icon: "question",
+                                    title: "Wow!\nIt's a draw!",
                                     showConfirmButton: false,
                                     timer: 2000,
                                 });
                             }
-                        } else {
-                            setInfo("It's a draw!");
-                            Swal.fire({
-                                icon: "question",
-                                title: "Wow!\nIt's a draw!",
-                                showConfirmButton: false,
-                                timer: 2000,
-                            });
                         }
                     } else {
                         setInfo(`Current player: ${gameData.currentPlayer}`);
@@ -77,11 +96,12 @@ const Game = () => {
                 });
 
                 socket.on("updateRanking", (data) => {
-                    submitGameResult(
-                        data.winnerEmail,
-                        data.loserEmail,
-                        data.result
-                    );
+                    if (data.winner == playerRole && !data.alreadySent)
+                        submitGameResult(
+                            data.winnerEmail,
+                            data.loserEmail,
+                            data.result
+                        );
                 });
 
                 return () => {
@@ -94,7 +114,7 @@ const Game = () => {
         } else {
             window.location.href = "/login";
         }
-    }, [socket]);
+    }, [socket, playerRole]);
 
     const handleCellClick = (index) => {
         if (!gameOver && board[index] === "" && currentPlayer === playerRole) {
@@ -107,10 +127,10 @@ const Game = () => {
         setWinningCombination(null);
     };
 
-    let debouncing = false;
+    // let debouncing = false;
     const submitGameResult = async (player1Email, player2Email, result) => {
         if (debouncing) return;
-        debouncing = true;
+        setDebouncing(true);
 
         try {
             const response = await axios.post(API_URL, {
@@ -123,9 +143,7 @@ const Game = () => {
         } catch (error) {
             console.error("Error updating rankings:", error);
         } finally {
-            setTimeout(() => {
-                debouncing = false;
-            }, 10000); // 10 seconds debounce time
+            setTimeout(setDebouncing(false), 10000); // 10 seconds debounce time
         }
     };
 

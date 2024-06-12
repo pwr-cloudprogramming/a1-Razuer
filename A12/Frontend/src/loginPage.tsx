@@ -26,8 +26,9 @@ const LoginPage = () => {
                         title: "Successfully logged in!",
                         showConfirmButton: false,
                         timer: 1500,
+                    }).then(() => {
+                        window.location.replace("/game");
                     });
-                    navigate("/game");
                 } else {
                     console.error("Session token was not set properly.");
                 }

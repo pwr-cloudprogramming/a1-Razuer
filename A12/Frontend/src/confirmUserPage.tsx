@@ -1,10 +1,10 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { confirmSignUp } from "./authService.ts";
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
 
 const ConfirmUserPage = () => {
     const navigate = useNavigate();
@@ -13,6 +13,14 @@ const ConfirmUserPage = () => {
     const [email, setEmail] = useState(location.state?.email || "");
     const [confirmationCode, setConfirmationCode] = useState("");
 
+    useEffect(() => {
+        Swal.fire({
+            title: "Welcome!",
+            text: "Check your email for a confirmation code to verify your account.",
+            icon: "info",
+        });
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
@@ -20,14 +28,15 @@ const ConfirmUserPage = () => {
             Swal.fire({
                 title: "Hurray!",
                 text: "Account confirmed successfully!\nSign in on next page.",
-                icon: "success"
+                icon: "success",
+            }).then(() => {
+                navigate("/login");
             });
-            navigate("/login");
         } catch (error) {
             Swal.fire({
                 title: "Upsyy ...",
                 text: `Failed to confirm account: ${error}`,
-                icon: "error"
+                icon: "error",
             });
         }
     };

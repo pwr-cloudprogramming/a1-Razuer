@@ -16,8 +16,8 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const rateLimiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute window
-    max: 3, // Limit each IP to 3 requests per windowMs
+    windowMs: 30 * 1000, // 1 minute window
+    max: 5, // Limit each IP to 3 requests per windowMs
     message: "Too many requests from this IP, please try again after a minute",
 });
 
@@ -40,13 +40,13 @@ const sns = new AWS.SNS(s3Config);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/rankings", rateLimiter);
-app.use("/game-history/:email", rateLimiter);
-app.use("/profile-pic/:email", rateLimiter);
-app.use("/upload", rateLimiter);
-app.use("/subscribe-sns", rateLimiter);
-app.use("/unsubscribe-sns", rateLimiter);
-app.use("/sns-subscription-status/:email", rateLimiter);
+// app.use("/rankings", rateLimiter);
+// app.use("/game-history/:email", rateLimiter);
+// app.use("/profile-pic/:email", rateLimiter);
+// app.use("/upload", rateLimiter);
+// app.use("/subscribe-sns", rateLimiter);
+// app.use("/unsubscribe-sns", rateLimiter);
+// app.use("/sns-subscription-status/:email", rateLimiter);
 
 const upload = multer({
     storage: multerS3({
@@ -70,10 +70,11 @@ let gameData = {
     winner: null,
     gameOver: false,
     winningCombination: -1,
+    oldGame: false,
 };
 
 playerNum = 0;
-nextPlayerRole = "X";
+lastNotificationTime = 0;
 const playerList = new Map();
 const playerEmails = new Map();
 
@@ -100,29 +101,34 @@ function saveGameResult(email, result, enemy_email) {
     return dynamoDb.put(params).promise();
 }
 
-// function snsUpdateRanking(winnerEmail, loserEmail) {
-//     const params = {
-//         Message: `Ranking updated: ${winnerEmail} won against ${loserEmail}`,
-//         TopicArn: SNS_TOPIC_ARN,
-//     };
+function getNextPlayerRole() {
+    const values = Array.from(playerList.values());
 
-//     return sns.publish(params).promise();
-// }
+    if (values.includes("X") && !values.includes("O")) {
+        return "O";
+    } else if (!values.includes("X") && values.includes("O")) {
+        return "X";
+    } else if (!values.includes("X") && !values.includes("O")) {
+        return "X";
+    } else {
+        return null;
+    }
+}
 
 io.on("connection", (socket) => {
     socket.on("setEmail", (email) => {
         playerEmails.set(socket.id, email);
     });
-    console.log(playerEmails);
 
     if (playerList.size < 2) {
         console.log("Player connected! Socket: " + socket.id);
         playerNum++;
         console.log("Number of players: ", playerNum);
-        socket.emit("playerRole", nextPlayerRole);
-        playerList.set(socket.id, nextPlayerRole);
-
-        nextPlayerRole = nextPlayerRole === "X" ? "O" : "X";
+        let role = getNextPlayerRole();
+        socket.emit("playerRole", role);
+        playerList.set(socket.id, role);
+        console.log(playerEmails);
+        console.log(playerList);
 
         if (playerNum == 1) {
             socket.emit("waiting");
@@ -138,8 +144,9 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         if (playerList.has(socket.id)) {
-            nextPlayerRole = playerList.get(socket.id);
-            console.log("Player " + nextPlayerRole + " disconnected!");
+            console.log(
+                "Player " + playerList.get(socket.id) + " disconnected!"
+            );
             playerNum--;
             console.log("Number of players: ", playerNum);
             playerList.delete(socket.id);
@@ -149,7 +156,6 @@ io.on("connection", (socket) => {
         }
     });
 
-    let lastNotificationTime = 0;
     socket.on("makeMove", (index) => {
         if (
             !gameData.gameOver &&
@@ -178,6 +184,8 @@ io.on("connection", (socket) => {
                         winnerEmail: winnerEmail,
                         loserEmail: loserEmail,
                         result: "player1",
+                        winner: gameData.winner,
+                        alreadySent: gameData.oldGame,
                     });
                 }
             } else if (!gameData.board.includes("")) {
@@ -190,7 +198,8 @@ io.on("connection", (socket) => {
                     gameData.currentPlayer === "X" ? "O" : "X";
             }
             io.emit("gameState", gameData);
-            console.log("Win Cond: " + gameData.winningCombination);
+            if (gameData.gameOver) gameData.oldGame = true;
+            // console.log("Win Cond: " + gameData.winningCombination);
         }
     });
 
@@ -230,6 +239,7 @@ function resetGame() {
         winner: null,
         gameOver: false,
         winningCombination: -1,
+        oldGame: false,
     };
 }
 
@@ -403,7 +413,7 @@ app.get("/sns-subscription-status/:email", async (req, res) => {
 });
 
 // Endpoint to get player ranking
-app.get("/ranking", async (req, res) => {
+app.get("/ranking", rateLimiter, async (req, res) => {
     const params = {
         TableName: "GameRankings",
         ScanIndexForward: false,

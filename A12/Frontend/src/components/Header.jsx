@@ -73,15 +73,16 @@ const Header = () => {
     }, [email, socket]);
 
     const handleLogout = () => {
-        sessionStorage.clear();
-        disconnectSocket();
         Swal.fire({
             icon: "info",
             title: "You have successfully logged out!",
             showConfirmButton: false,
             timer: 1500,
+        }).then(() => {
+            window.location.replace("/login");
+            sessionStorage.clear();
+            disconnectSocket();
         });
-        navigate("/login");
     };
 
     const handleImageChange = async (event) => {
